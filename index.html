@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORIGIN X — Image Origin Estimator</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Header / Nav Chrome -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-glyph" aria-hidden="true">⬡</span>
+        <span class="brand-name">ORIGIN <strong>X</strong></span>
+        <span class="brand-tag">Probabilistic Estimator</span>
+      </div>
+      <div class="system-status" id="system-status" aria-label="System Status">
+        <span class="status-dot ready"></span>
+        <span class="status-label">Engine Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="main-content">
+    <section class="hero-section">
+      <h1 class="hero-title">Image Origin Estimation</h1>
+      <p class="hero-subtitle">
+        Probabilistic assessment of camera-captured, hand-created, or digitally authored imagery versus AI generation.
+      </p>
+    </section>
+
+    <!-- Upload & Analysis Workstation -->
+    <div class="workstation-grid">
+      <!-- Left Panel: Direct Manipulation Upload Area -->
+      <section class="card upload-card" aria-labelledby="upload-title">
+        <div class="card-header">
+          <h2 id="upload-title" class="card-title">Image Ingestion</h2>
+          <span class="card-subtitle">JPEG, PNG, WebP up to 15 MB</span>
+        </div>
+
+        <div 
+          id="dropzone" 
+          class="dropzone" 
+          tabindex="0" 
+          role="button" 
+          aria-label="Upload image by dragging and dropping or pressing to browse"
+        >
+          <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" class="visually-hidden">
+          
+          <div id="dropzone-prompt" class="dropzone-content">
+            <div class="upload-icon" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <div class="upload-text">
+              <strong>Choose an image</strong> or drag and drop here
+            </div>
+            <div class="upload-hint">Analyzed securely in memory — zero disk retention</div>
+          </div>
+
+          <!-- Preview State -->
+          <div id="preview-container" class="preview-container hidden">
+            <img id="preview-image" src="" alt="Uploaded preview">
+            <div class="preview-overlay">
+              <button id="btn-change-image" class="btn btn-secondary btn-sm" aria-label="Change uploaded image">Replace</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- File Details Bar -->
+        <div id="file-details" class="file-details hidden">
+          <span id="file-meta-name" class="meta-item filename">filename.jpg</span>
+          <span id="file-meta-dims" class="meta-item">-- × --</span>
+          <span id="file-meta-size" class="meta-item">-- MB</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="action-bar">
+          <button id="btn-analyze" class="btn btn-primary" disabled>
+            <span class="btn-text">Estimate Origin</span>
+            <span class="btn-spinner hidden" aria-hidden="true"></span>
+          </button>
+          <button id="btn-reset" class="btn btn-tertiary" disabled>Clear</button>
+        </div>
+
+        <!-- Privacy & Security Notice -->
+        <div class="privacy-banner">
+          <svg class="privacy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span>Privacy Guaranteed: Images are processed ephemerally in RAM and immediately deallocated.</span>
+        </div>
+      </section>
+
+      <!-- Right Panel: Probabilistic Results & Forensic Signals -->
+      <section class="card results-card" aria-labelledby="results-title">
+        <div class="card-header">
+          <h2 id="results-title" class="card-title">Analysis Verdict</h2>
+          <span id="result-status-tag" class="status-tag idle">Awaiting Input</span>
+        </div>
+
+        <!-- Empty State -->
+        <div id="results-empty" class="results-empty">
+          <div class="empty-glyph" aria-hidden="true">◈</div>
+          <p class="empty-title">No image analyzed yet</p>
+          <p class="empty-desc">Select an image on the left and run analysis to inspect calibrated origin probability and signal breakdown.</p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="results-loading" class="results-loading hidden" aria-live="polite">
+          <div class="indeterminate-bar">
+            <div class="indeterminate-progress"></div>
+          </div>
+          <p class="loading-status-text">Extracting multi-scale spatial and spectral artifacts...</p>
+        </div>
+
+        <!-- Active Result View -->
+        <div id="results-active" class="results-active hidden" aria-live="polite">
+          <!-- Primary Verdict Banner -->
+          <div id="verdict-banner" class="verdict-banner">
+            <div class="verdict-header">
+              <span id="verdict-badge" class="verdict-badge">INCONCLUSIVE</span>
+              <span id="confidence-tier" class="confidence-tier">Confidence: High</span>
+            </div>
+            <p id="verdict-rationale" class="verdict-rationale">Explanatory rationale text appears here.</p>
+          </div>
+
+          <!-- Probability Gauge -->
+          <div class="probability-section">
+            <div class="prob-header">
+              <span class="prob-title">Estimated AI Probability</span>
+              <span id="prob-percentage" class="prob-value">50.0%</span>
+            </div>
+            
+            <div class="meter-track" role="meter" aria-label="Calibrated AI probability" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+              <div id="meter-fill" class="meter-fill" style="width: 50%;"></div>
+              <div id="confidence-interval-marker" class="ci-marker" title="Confidence Interval"></div>
+            </div>
+
+            <div class="meter-labels">
+              <span>0% Human</span>
+              <span class="neutral-threshold">Indeterminate Margin (42%–58%)</span>
+              <span>100% AI</span>
+            </div>
+            <div id="ci-text" class="ci-caption">Estimated 95% Confidence Interval: [44.0% – 56.0%]</div>
+          </div>
+
+          <!-- Forensic Signal Diagnostics -->
+          <div class="diagnostics-section">
+            <h3 class="diagnostics-title">Physical & Structural Signals</h3>
+            <div class="signal-grid">
+              <!-- Signal 1: Spectral Rolloff -->
+              <div class="signal-card">
+                <div class="signal-header">
+                  <span class="signal-name">Frequency Rolloff</span>
+                  <span id="signal-spectral-val" class="signal-badge">0.00</span>
+                </div>
+                <p id="signal-spectral-desc" class="signal-desc">Analysis of high-frequency radial harmonics from transposed convolutions or sensor optical rolloff.</p>
+              </div>
+
+              <!-- Signal 2: Sensor/Noise Residual -->
+              <div class="signal-card">
+                <div class="signal-header">
+                  <span class="signal-name">Sensor Shot Noise</span>
+                  <span id="signal-noise-val" class="signal-badge">0.00</span>
+                </div>
+                <p id="signal-noise-desc" class="signal-desc">High-pass residual kurtosis examining Poisson-Gaussian photon shot noise versus denoiser smoothness.</p>
+              </div>
+
+              <!-- Signal 3: Chromatic Consistency -->
+              <div class="signal-card">
+                <div class="signal-header">
+                  <span class="signal-name">Chromatic Profile</span>
+                  <span id="signal-color-val" class="signal-badge">0.00</span>
+                </div>
+                <p id="signal-color-desc" class="signal-desc">Cross-channel color covariance and high-saturation ratio distribution.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Epistemic Disclaimer -->
+          <div class="disclaimer-callout">
+            <strong>Notice on Origin Estimation:</strong> ORIGIN X treats origin verification as a probabilistic inference task. Even calibrated models cannot establish definitive provenance from pixels alone. Results should not be used as legal or punitive proof.
+          </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="results-error" class="results-error hidden" role="alert">
+          <div class="error-icon" aria-hidden="true">⚠</div>
+          <div class="error-body">
+            <strong id="error-title">Analysis Failed</strong>
+            <p id="error-detail">An error occurred while inspecting the file.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <span>ORIGIN X v1.0 • Calibrated Multi-Scale Convolutional Engine</span>
+      <span class="footer-divider">•</span>
+      <span>Model Checkpoint: Verified 90.0% Held-Out / 100.0% Untouched Eval</span>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
